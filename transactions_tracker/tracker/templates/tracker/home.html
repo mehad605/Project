@@ -10,7 +10,7 @@
 
             <!-- Date Filter -->
             <div>
-                <label class="block text-[var(--comment)] mb-2">Date Range</label>
+                <label class="block text-[var(--white)] mb-2">Date Range</label>
                 <div class="flex gap-2 border rounded p-1 bg-[var(--background)]">
                     <button type="button" data-range="day" class="date-tab px-3 py-2 w-full {% if active_range == 'day' %}bg-[var(--purple)] text-white{% endif %}">Day</button>
                     <button type="button" data-range="month" class="date-tab px-3 py-2 w-full {% if active_range == 'month' %}bg-[var(--purple)] text-white{% endif %}">Month</button>
@@ -25,13 +25,13 @@
 
             <!-- Search Filter -->
             <div>
-                <label for="searchInput" class="block text-[var(--comment)] mb-2">Search Comments</label>
+                <label for="searchInput" class="block text-[var(--white)] mb-2">Search Comments</label>
                 <input type="text" id="searchInput" name="search" value="{{ request.GET.search }}" class="w-full bg-[var(--background)] p-2 rounded">
             </div>
 
             <!-- Category Filter -->
             <div>
-                <label for="categorySelect" class="block text-[var(--comment)] mb-2">Category</label>
+                <label for="categorySelect" class="block text-[var(--white)] mb-2">Category</label>
                 <select id="categorySelect" name="category" class="w-full bg-[var(--background)] p-2 rounded">
                     <option value="">All Categories</option>
                     {% for cat in categories %}
@@ -61,20 +61,30 @@
                 <a href="?type=income" class="px-4 py-2 {% if current_type == 'income' %}border-b-2 border-[var(--green)]{% endif %}">Income</a>
             </div>
             {% for transaction in transactions %}
-            <div class="bg-[var(--current-line)] p-4 rounded-lg hover:bg-[var(--comment)] transition-colors">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <span class="font-bold {% if transaction.is_expense %}text-[var(--red)]{% else %}text-[var(--green)]{% endif %}">$ {{ transaction.amount }}</span>
-                        <span class="ml-2 text-[var(--comment)]">{{ transaction.category }}</span>
-                    </div>
-                    <div class="text-sm text-[var(--comment)]">{{ transaction.date }}<br><span class="text-xs">{{ transaction.comment|truncatechars:30 }}</span></div>
-                    <div class="flex items-center gap-4">
-                        <a href="{% url 'edit_transaction' transaction.pk %}" class="text-[var(--cyan)] hover:text-[var(--green)]">Edit</a>
-                        <form method="post" action="{% url 'delete_transaction' transaction.pk %}">
-                            {% csrf_token %}
-                            <button type="submit" class="text-[var(--red)] hover:text-[var(--orange)]">Delete</button>
-                        </form>
-                    </div>
+            <div class="grid grid-cols-4 items-center bg-[var(--current-line)] p-4 rounded-lg hover:bg-grey transition-colors">
+                <!-- Amount & Category Column -->
+                <div class="flex items-center space-x-2">
+                    <span class="font-bold {% if transaction.is_expense %}text-[var(--red)]{% else %}text-[var(--green)]{% endif %}">$ {{ transaction.amount }}</span>
+                    <span class="text-[var(--white)]">{{ transaction.category }}</span>
+                </div>
+
+                <!-- Date Column with extra margin -->
+                <div class="text-sm text-[var(--white)] ml-14">
+                    {{ transaction.date }}
+                </div>
+
+                <!-- Comment Column -->
+                <div class="text-xs text-[var(--white)]">
+                    {{ transaction.comment|truncatechars:30 }}
+                </div>
+
+                <!-- Edit & Delete Column aligned to the right -->
+                <div class="flex items-center gap-4 justify-end">
+                    <a href="{% url 'edit_transaction' transaction.pk %}" class="text-[var(--cyan)] hover:text-[var(--green)]">Edit</a>
+                    <form method="post" action="{% url 'delete_transaction' transaction.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="text-[var(--red)] hover:text-[var(--orange)]">Delete</button>
+                    </form>
                 </div>
             </div>
             {% empty %}
@@ -109,8 +119,22 @@
     document.getElementById('clearFiltersBtn').addEventListener('click', () => {
         window.location.href = "{% url 'home' %}?type={{ current_type }}";
     });
+    // new Chart(document.getElementById('categoryChart').getContext('2d'), {
+    //     type: 'doughnut', data: JSON.parse('{{ category_data|escapejs }}'), options: { responsive: true }
+    // });
     new Chart(document.getElementById('categoryChart').getContext('2d'), {
-        type: 'doughnut', data: JSON.parse('{{ category_data|escapejs }}'), options: { responsive: true }
+    type: 'doughnut',
+    data: JSON.parse('{{ category_data|escapejs }}'),
+    options: {
+        responsive: true,
+        plugins: {
+        legend: {
+            labels: {
+            color: 'white' // Set legend labels to off-white for Dracula theme
+            }
+        }
+        }
+    }
     });
 </script>
 {% endblock %}
